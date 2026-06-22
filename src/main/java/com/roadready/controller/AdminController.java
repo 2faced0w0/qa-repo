@@ -68,7 +68,7 @@ public class AdminController {
                 req.getDescription(),
                 req.getDaysSinceLastService(),
                 req.getCreatedAt()
-        )).collect(Collectors.toList());
+        )).toList();
         return ResponseEntity.ok(dtos);
     }
 
@@ -82,7 +82,7 @@ public class AdminController {
         userRepository.save(user);
 
         request.setStatus(RequestStatus.RESOLVED);
-        request.setResolvedAt(LocalDateTime.now());
+        request.setResolvedAt(LocalDateTime.now(java.time.ZoneId.systemDefault()));
         requestRepository.save(request);
 
         return ResponseEntity.ok("Password reset successfully.");
@@ -102,12 +102,12 @@ public class AdminController {
         com.roadready.model.RentalAgent agent = rentalAgentRepository.findByUser(request.getRequestedBy())
                 .orElseThrow(() -> new RuntimeException("Agent not found"));
 
-        com.roadready.model.MaintenanceRecord record = new com.roadready.model.MaintenanceRecord();
-        record.setVehicle(vehicle);
-        record.setParticulars(request.getDescription());
-        record.setDaysSinceLastService(request.getDaysSinceLastService() != null ? request.getDaysSinceLastService() : 0);
-        record.setUpdatedByAgent(agent);
-        maintenanceRecordRepository.save(record);
+        com.roadready.model.MaintenanceRecord maintenanceRecord = new com.roadready.model.MaintenanceRecord();
+        maintenanceRecord.setVehicle(vehicle);
+        maintenanceRecord.setParticulars(request.getDescription());
+        maintenanceRecord.setDaysSinceLastService(request.getDaysSinceLastService() != null ? request.getDaysSinceLastService() : 0);
+        maintenanceRecord.setUpdatedByAgent(agent);
+        maintenanceRecordRepository.save(maintenanceRecord);
 
         requestRepository.delete(request);
 

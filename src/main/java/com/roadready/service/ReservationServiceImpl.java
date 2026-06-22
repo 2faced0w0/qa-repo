@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
 
+    private static final String RESERVATION_NOT_FOUND_MSG = "Reservation not found";
+
     private final ReservationRepository reservationRepository;
     private final CustomerRepository customerRepository;
     private final VehicleRepository vehicleRepository;
@@ -46,7 +48,11 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setBookingStatus(BookingStatus.CONFIRMED);
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        long days = java.time.temporal.ChronoUnit.DAYS.between(requestDto.pickupTime(), requestDto.dropoffTime());
+        java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+        long days = java.time.temporal.ChronoUnit.DAYS.between(
+            requestDto.pickupTime().atZone(zone), 
+            requestDto.dropoffTime().atZone(zone)
+        );
         if (days <= 0) days = 1;
         java.math.BigDecimal totalAmount = vehicle.getPricingPerDay().multiply(java.math.BigDecimal.valueOf(days));
 
@@ -72,7 +78,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto cancelReservation(Integer reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_FOUND_MSG));
 
         reservation.setBookingStatus(BookingStatus.CANCELLED);
         Reservation updatedReservation = reservationRepository.save(reservation);
@@ -109,7 +115,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto modifyReservation(Integer reservationId, ReservationRequestDto requestDto) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_FOUND_MSG));
         
         Vehicle vehicle = vehicleRepository
                 .findById(requestDto.vehicleId())
@@ -128,7 +134,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto checkOut(Integer reservationId, String initialCondition) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_FOUND_MSG));
         reservation.setBookingStatus(BookingStatus.CHECKED_OUT);
         
         Vehicle vehicle = reservation.getVehicle();
@@ -144,7 +150,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public ReservationResponseDto checkIn(Integer reservationId, String finalCondition) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+                .orElseThrow(() -> new IllegalArgumentException(RESERVATION_NOT_FOUND_MSG));
         reservation.setBookingStatus(BookingStatus.COMPLETED); // Or CHECKED_IN, user said CHECKED_IN/CHECKED_OUT
         
         Vehicle vehicle = reservation.getVehicle();

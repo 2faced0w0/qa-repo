@@ -33,7 +33,7 @@ public class MaintenanceRecordController {
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('AGENT')")
     public ResponseEntity<MaintenanceRecordDto> addMaintenanceRequest(@RequestBody com.roadready.dto.MaintenanceRequestDto dto) {
-        MaintenanceRecordDto record = maintenanceRecordService.addMaintenanceRecord(dto);
-        return ResponseEntity.ok(record);
+        MaintenanceRecordDto maintenanceRecordDto = maintenanceRecordService.addMaintenanceRecord(dto);
+        return ResponseEntity.ok(maintenanceRecordDto);
     }
 }

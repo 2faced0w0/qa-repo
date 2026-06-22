@@ -21,6 +21,10 @@ import org.springframework.http.HttpMethod;
 @EnableMethodSecurity // To allow @PreAuthorize
 public class SecurityConfig {
 
+    private static final String ROLE_AGENT = "AGENT";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_CUSTOMER = "CUSTOMER";
+
     private final JwtFilter jwtFilter;
 
     public SecurityConfig(JwtFilter jwtFilter) {
@@ -33,16 +37,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless APIs
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Allow login-signup auth endpoints for all
-                        .requestMatchers(HttpMethod.GET, "/api/vehicles/search").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/vehicles/brands").permitAll()// Allow
-                        .requestMatchers("/api/reservations/**").hasAnyAuthority("CUSTOMER", "AGENT", "ADMIN")
+                        .requestMatchers("/api/v1/auth/**").permitAll() // Allow login-signup auth endpoints for all
+                        .requestMatchers(HttpMethod.GET, "/api/v1/vehicles/search").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/vehicles/brands").permitAll()// Allow
+                        .requestMatchers("/api/v1/reservations/**").hasAnyAuthority(ROLE_CUSTOMER, ROLE_AGENT, ROLE_ADMIN)
                                                                                                                       // vehicle
                                                                                                                       // auth
-                        .requestMatchers("/api/admin/**").hasAuthority("ADMIN") // Restricted to ADMIN
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/vehicles/add").hasAnyAuthority("ADMIN", "AGENT") // Restricted to ADMIN or AGENT
+                        .requestMatchers("/api/v1/admin/**").hasAuthority(ROLE_ADMIN) // Restricted to ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/v1/vehicles/add").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT) // Restricted to ADMIN or AGENT
                         .requestMatchers("/error").permitAll() // Expose actual errors instead of 403
-                        .requestMatchers(("/{customerId}/past")).hasAnyAuthority("ADMIN", "AGENT")
+                        .requestMatchers(("/{customerId}/past")).hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT)
                         .anyRequest().authenticated())
                 .httpBasic(org.springframework.security.config.Customizer.withDefaults());
 

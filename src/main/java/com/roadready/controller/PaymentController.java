@@ -43,7 +43,7 @@ public class PaymentController {
                         p.getPaymentStatus().name(),
                         p.getPaymentDate()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(dtos);
     }

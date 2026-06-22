@@ -47,16 +47,27 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public PaginatedResponse<VehicleDto> searchVehicles(String model, BigDecimal maxPrice, String brandName,
-            String location, java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, String vehicleType, String subType, Pageable pageable) {
-        Page<VehicleDto> vehiclePage = vehicleRepository.searchVehicles(model, maxPrice, brandName, location, startDate, endDate, vehicleType, subType, pageable);
+    public PaginatedResponse<VehicleDto> searchVehicles(com.roadready.dto.VehicleSearchCriteria criteria, Pageable pageable) {
+        Page<VehicleDto> vehiclePage = vehicleRepository.searchVehicles(
+            criteria.model(), 
+            criteria.maxPrice(), 
+            criteria.brandName(), 
+            criteria.location(), 
+            criteria.startDate(), 
+            criteria.endDate(), 
+            criteria.vehicleType(), 
+            criteria.subType(), 
+            pageable
+        );
+
         return new PaginatedResponse<>(
                 vehiclePage.getContent(),
                 vehiclePage.getNumber(),
                 vehiclePage.getSize(),
                 vehiclePage.getTotalElements(),
                 vehiclePage.getTotalPages(),
-                vehiclePage.isLast());
+                vehiclePage.isLast()
+        );
     }
 
     @Override

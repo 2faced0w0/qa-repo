@@ -28,6 +28,8 @@ import java.security.Principal;
 @CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
+    private static final String INVALID_CREDENTIALS_MSG = "Invalid Credentials!!!";
+
     private final UserService userService;
     private final JwtUtility jwtUtility;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
@@ -55,17 +57,17 @@ public class AuthController {
         String name = null;
         if (role.equals("CUSTOMER")) {
             Customer customer = customerRepository.findByUser(user).orElseThrow(
-                    () -> new CustomerNotFoundException("Invalid Credentials!!!"));
+                    () -> new CustomerNotFoundException(INVALID_CREDENTIALS_MSG));
             id = customer.getId();
             name = customer.getName();
         } else if (role.equals("ADMIN")) {
             com.roadready.model.Admin admin = adminRepository.findByUser(user).orElseThrow(
-                    () -> new CustomerNotFoundException("Invalid Credentials!!!"));
+                    () -> new CustomerNotFoundException(INVALID_CREDENTIALS_MSG));
             id = admin.getId();
             name = admin.getName();
         } else if (role.equals("AGENT")) {
             com.roadready.model.RentalAgent agent = rentalAgentRepository.findByUser(user).orElseThrow(
-                    () -> new CustomerNotFoundException("Invalid Credentials!!!"));
+                    () -> new CustomerNotFoundException(INVALID_CREDENTIALS_MSG));
             id = agent.getId();
             name = agent.getName();
         }

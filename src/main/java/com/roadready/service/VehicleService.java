@@ -5,17 +5,10 @@ import com.roadready.dto.VehicleDto;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 
+import com.roadready.dto.VehicleSearchCriteria;
+
 public interface VehicleService {
-    PaginatedResponse<VehicleDto> searchVehicles(
-            String model,
-            BigDecimal maxPrice,
-            String brandName,
-            String location,
-            java.time.LocalDateTime startDate,
-            java.time.LocalDateTime endDate,
-            String vehicleType,
-            String subType,
-            Pageable pageable);
+    PaginatedResponse<VehicleDto> searchVehicles(VehicleSearchCriteria criteria, Pageable pageable);
 
     VehicleDto addVehicle(com.roadready.dto.VehicleRequestDto dto);
     void deleteVehicle(Integer id);

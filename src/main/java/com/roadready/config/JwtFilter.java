@@ -1,5 +1,6 @@
 package com.roadready.config;
 
+import com.roadready.exception.TokenNotFoundException;
 import com.roadready.service.UserService;
 import com.roadready.utility.JwtUtility;
 import jakarta.servlet.FilterChain;
@@ -26,7 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        /// intercept the token , validate it or else throw an exception
+        // intercept the token , validate it or else throw an exception
 
         final String authorizationHeader = request.getHeader("Authorization");
         String username = null;
@@ -57,7 +58,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         }
         catch(Exception e){
-            throw new RuntimeException("Token not found..");
+            throw new TokenNotFoundException("Token not found..");
         }
 
 

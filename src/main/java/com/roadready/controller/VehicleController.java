@@ -34,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/vehicles")
 public class VehicleController {
 
+    private static final String NOT_FOUND_MSG = "Not found";
+
     private final VehicleService vehicleService;
     private final BrandRepository brandRepository;
     private final VehicleRepository vehicleRepository;
@@ -48,17 +50,10 @@ public class VehicleController {
 
     @GetMapping("/search")
     public ResponseEntity<PaginatedResponse<VehicleDto>> searchVehicles(
-            @RequestParam(required = false) String model,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) String brandName,
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate,
-            @RequestParam(required = false) String vehicleType,
-            @RequestParam(required = false) String subType,
+            @ModelAttribute com.roadready.dto.VehicleSearchCriteria criteria,
             Pageable pageable) {
-        log.info("Searching vehicles with model: {}, brand: {}, location: {}", model, brandName, location);
-        PaginatedResponse<VehicleDto> vehicles = vehicleService.searchVehicles(model, maxPrice, brandName, location, startDate, endDate, vehicleType, subType, pageable);
+        log.info("Searching vehicles with model: {}, brand: {}, location: {}", criteria.model(), criteria.brandName(), criteria.location());
+        PaginatedResponse<VehicleDto> vehicles = vehicleService.searchVehicles(criteria, pageable);
         return ResponseEntity.ok(vehicles);
     }
 
@@ -80,7 +75,7 @@ public class VehicleController {
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateVehicle(@PathVariable Integer id, @RequestBody com.roadready.dto.VehicleRequestDto dto) {
-        com.roadready.model.Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+        com.roadready.model.Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException(NOT_FOUND_MSG));
         vehicle.setModel(dto.model());
         vehicle.setPricingPerDay(dto.pricingPerDay());
         vehicle.setLocation(dto.location());
@@ -102,7 +97,7 @@ public class VehicleController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<String> updateStatus(@PathVariable Integer id, @RequestParam com.roadready.enums.AvailabilityStatus status) {
-        com.roadready.model.Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+        com.roadready.model.Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException(NOT_FOUND_MSG));
         vehicle.setAvailabilityStatus(status);
         vehicleRepository.save(vehicle);
         return ResponseEntity.ok("Vehicle status updated to " + status);
@@ -110,7 +105,7 @@ public class VehicleController {
 
     @PutMapping("/{id}/finish-maintenance")
     public ResponseEntity<String> finishMaintenance(@PathVariable Integer id) {
-        com.roadready.model.Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException("Not found"));
+        com.roadready.model.Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(() -> new RuntimeException(NOT_FOUND_MSG));
         vehicle.setAvailabilityStatus(com.roadready.enums.AvailabilityStatus.AVAILABLE);
         vehicleRepository.save(vehicle);
         return ResponseEntity.ok("Vehicle marked as available and maintenance finished.");
@@ -147,7 +142,7 @@ public class VehicleController {
             return ResponseEntity.ok(relativeUrl);
             
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error uploading file: {}", e.getMessage());
             return ResponseEntity.internalServerError().body("Could not upload the file: " + e.getMessage());
         }
     }

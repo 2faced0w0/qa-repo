@@ -19,8 +19,8 @@ import io.jsonwebtoken.security.Keys;
 @NoArgsConstructor
 public class JwtUtility { //Create(Encryption) and Validate (Decryption)
 
-    private String SECRET_KEY="hsdjfghsdjfh348534857348jsdhjsdhfjsdgh8478457hdgjfh478";
-    SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
+    private String secretKeyString = System.getenv().getOrDefault("JWT_SECRET", "hsdjfghsdjfh348534857348jsdhjsdhfjsdgh8478457hdgjfh478");
+    SecretKey secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKeyString));
 
     /*
      * steps:
