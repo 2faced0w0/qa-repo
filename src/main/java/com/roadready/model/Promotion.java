@@ -32,4 +32,7 @@ public class Promotion {
 
     @Column(name = "discount_percentage", nullable = false)
     private Integer discountPercentage;
+
+    @Column(name = "is_banner_active")
+    private Boolean isBannerActive = false;
 }

@@ -20,6 +20,30 @@ public class PromotionController {
         return ResponseEntity.ok(promotionRepository.findAll());
     }
 
+    @GetMapping("/active-banner")
+    public ResponseEntity<?> getActiveBanner() {
+        return promotionRepository.findByIsBannerActiveTrue()
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @PutMapping("/{id}/set-banner")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> setActiveBanner(@PathVariable Integer id) {
+        // Unset any currently active banner
+        promotionRepository.findByIsBannerActiveTrue().ifPresent(promo -> {
+            promo.setIsBannerActive(false);
+            promotionRepository.save(promo);
+        });
+
+        // Set the new banner
+        return promotionRepository.findById(id).map(promo -> {
+            promo.setIsBannerActive(true);
+            promotionRepository.save(promo);
+            return ResponseEntity.ok(promo);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/validate")
     public ResponseEntity<?> validatePromotion(@RequestParam String code) {
         return promotionRepository.findByPromoCode(code)

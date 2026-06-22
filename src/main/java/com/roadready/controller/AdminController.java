@@ -53,6 +53,17 @@ public class AdminController {
         return ResponseEntity.ok("Rental Agent created successfully.");
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<List<com.roadready.dto.UserResponseDto>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<com.roadready.dto.UserResponseDto> dtos = users.stream().map(u -> new com.roadready.dto.UserResponseDto(
+                u.getId(),
+                u.getUsername(),
+                u.getRole().toString()
+        )).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
     @GetMapping("/requests")
     public ResponseEntity<List<RequestDto>> getPendingRequests() {
         List<Request> pendingRequests = requestRepository.findByStatus(RequestStatus.PENDING);

@@ -26,7 +26,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         // intercept the token , validate it or else throw an exception
 
         final String authorizationHeader = request.getHeader("Authorization");
@@ -35,36 +36,28 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 // Extract the username and token
-                jwt = authorizationHeader.substring(7); //this is the token
+                jwt = authorizationHeader.substring(7); // this is the token
                 username = jwtUtility.extractUsername(jwt); // this is the username
             }
-            // Validate
             // Ensure user is not loggedIn
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
                 UserDetails userDetails = userService.loadUserByUsername(username);
 
                 if (jwtUtility.validateToken(jwt, userDetails.getUsername())) {
-
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
                     usernamePasswordAuthenticationToken
                             .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 }
-
             }
-            filterChain.doFilter(request,response);
-
+        } catch (Exception e) {
+            // Log the exception but continue the filter chain, allowing Spring Security to
+            // handle unauthenticated requests
+            System.err.println("JWT Validation Error: " + e.getMessage());
         }
-        catch(Exception e){
-            throw new TokenNotFoundException("Token not found..");
-        }
 
-
-
-        // The user is not already loggedIn
-
-
+        filterChain.doFilter(request, response);
     }
+
 }

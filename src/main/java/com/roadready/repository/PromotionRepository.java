@@ -13,4 +13,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 
     @Query("SELECT p FROM Promotion p WHERE p.promoCode = :promoCode")
     Optional<Promotion> findByPromoCode(@Param("promoCode") String promoCode);
+
+    Optional<Promotion> findByIsBannerActiveTrue();
 }

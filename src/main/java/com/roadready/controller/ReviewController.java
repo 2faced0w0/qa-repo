@@ -50,4 +50,13 @@ public class ReviewController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
+
+    @GetMapping("/top")
+    public ResponseEntity<List<ReviewResponseDto>> getTopReviews() {
+        List<Review> reviews = reviewRepository.findByRatingGreaterThan(3);
+        List<ReviewResponseDto> dtos = reviews.stream()
+                .map(r -> new ReviewResponseDto(r.getReviewId(), r.getReservation().getReservationId(), r.getRating(), r.getComments(), r.getCreatedAt()))
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
 }
